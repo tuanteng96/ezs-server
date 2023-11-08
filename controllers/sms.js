@@ -1,7 +1,9 @@
-import { getAccessToken } from "../utils/index.js"
+import {
+    getAccessToken
+} from "../utils/index.js"
 import https from "https"
 
-export const createSMS = async(req, res) => {
+export const createSMS = async (req, res) => {
 
     try {
         var options = {
@@ -15,36 +17,35 @@ export const createSMS = async(req, res) => {
                 'Accept': 'application/json'
             }
         };
-        var postData = JSON.stringify({
-            "sms": [{
-                "from": "FACEWASHFOX",
-                "to": req.body.Phone,
-                "text": req.body.Content
-            }]
+
+        var data = JSON.stringify(req.body);
+
+        let response = ""
+
+        var reqs = https.request(options, (config) => {
+            config.setEncoding('utf8');
+
+            config.on('data', (chunk) => {
+                response = chunk;
+            })
+
+            config.on('end', () => {
+                res.status(200).json({
+                    data: JSON.parse(response)
+                })
+            })
         });
 
-        var req = https.request(options, function(res) {
-            res.setEncoding('utf8');
-
-            res.on('data', function(chunk) {
-                console.log('BODY:', chunk);
-            });
-
-            res.on('end', function() {
-                console.log('No more data in response.');
-            });
+        reqs.on('error', (e) => {
+            res.status(500).json({error: e.message})
         });
 
-        req.on('error', function(e) {
-            console.log('Problem with request:', e.message);
-        });
-
-        req.write(postData);
-        req.end();
-
-        //res.status(200).json({})
+        reqs.write(data);
+        reqs.end();
 
     } catch (error) {
-        res.status(500).json({ error })
+        res.status(500).json({
+            error
+        })
     }
 }
