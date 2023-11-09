@@ -3,7 +3,7 @@ import {
 } from "../utils/index.js"
 import https from "https"
 
-export const createSMS = async (req, res) => {
+export const createSMS = async(req, res) => {
 
     try {
         var options = {
@@ -12,13 +12,13 @@ export const createSMS = async (req, res) => {
             path: '/v1/sms',
             method: 'POST',
             headers: {
-                'X-STRINGEE-AUTH': getAccessToken(),
+                'X-STRINGEE-AUTH': getAccessToken({ API_KEY_SECRET: req.body.API_KEY_SECRET, API_KEY_SID: req.body.API_KEY_SID }),
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             }
         };
 
-        var data = JSON.stringify(req.body);
+        var data = JSON.stringify({ sms: req.body.sms });
 
         let response = ""
 
@@ -37,7 +37,7 @@ export const createSMS = async (req, res) => {
         });
 
         reqs.on('error', (e) => {
-            res.status(500).json({error: e.message})
+            res.status(500).json({ error: e.message })
         });
 
         reqs.write(data);
